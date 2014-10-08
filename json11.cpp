@@ -50,9 +50,9 @@ static void dump(double value, string &out) {
     out += buf;
 }
 
-static void dump(int value, string &out) {
-    char buf[32];
-    snprintf(buf, sizeof buf, "%d", value);
+static void dump(long long int value, string &out) {
+    char buf[64];
+    snprintf(buf, sizeof buf, "%lld", value);
     out += buf;
 }
 
@@ -159,15 +159,17 @@ protected:
 class JsonDouble final : public Value<Json::NUMBER, double> {
     double number_value() const { return m_value; }
     int int_value() const { return m_value; }
+    long long int long_value() const { return m_value; }
     bool equals(const JsonValue * other) const { return m_value == other->number_value(); }
     bool less(const JsonValue * other)   const { return m_value <  other->number_value(); }
 public:
     JsonDouble(double value) : Value(value) {}
 };
 
-class JsonInt final : public Value<Json::NUMBER, int> {
+class JsonInt final : public Value<Json::NUMBER, long long int> {
     double number_value() const { return m_value; }
     int int_value() const { return m_value; }
+    long long int long_value() const { return m_value; }
     bool equals(const JsonValue * other) const { return m_value == other->number_value(); }
     bool less(const JsonValue * other)   const { return m_value <  other->number_value(); }
 public:
@@ -238,7 +240,8 @@ const Json & static_null() {
 Json::Json() noexcept                  : m_ptr(statics().null) {}
 Json::Json(std::nullptr_t) noexcept    : m_ptr(statics().null) {}
 Json::Json(double value)               : m_ptr(make_shared<JsonDouble>(value)) {}
-Json::Json(int value)                  : m_ptr(make_shared<JsonInt>(value)) {}
+Json::Json(int value)                  : m_ptr(make_shared<JsonInt>((long long int)value)) {}
+Json::Json(long long int value)        : m_ptr(make_shared<JsonInt>(value)) {}
 Json::Json(bool value)                 : m_ptr(value ? statics().t : statics().f) {}
 Json::Json(const string &value)        : m_ptr(make_shared<JsonString>(value)) {}
 Json::Json(string &&value)             : m_ptr(make_shared<JsonString>(move(value))) {}
@@ -255,6 +258,7 @@ Json::Json(Json::object &&values)      : m_ptr(make_shared<JsonObject>(move(valu
 Json::Type Json::type()                           const { return m_ptr->type();         }
 double Json::number_value()                       const { return m_ptr->number_value(); }
 int Json::int_value()                             const { return m_ptr->int_value();    }
+long long int Json::long_value()                  const { return m_ptr->long_value();    }
 bool Json::bool_value()                           const { return m_ptr->bool_value();   }
 const string & Json::string_value()               const { return m_ptr->string_value(); }
 const vector<Json> & Json::array_items()          const { return m_ptr->array_items();  }
@@ -264,6 +268,7 @@ const Json & Json::operator[] (const string &key) const { return (*m_ptr)[key]; 
 
 double                    JsonValue::number_value()              const { return 0; }
 int                       JsonValue::int_value()                 const { return 0; }
+long long int             JsonValue::long_value()                const { return 0; }
 bool                      JsonValue::bool_value()                const { return false; }
 const string &            JsonValue::string_value()              const { return statics().empty_string; }
 const vector<Json> &      JsonValue::array_items()               const { return statics().empty_vector; }
@@ -508,7 +513,7 @@ struct JsonParser {
 
         if (str[i] != '.' && str[i] != 'e' && str[i] != 'E'
                 && (i - start_pos) <= (size_t)std::numeric_limits<int>::digits10) {
-            return std::atoi(str.c_str() + start_pos);
+            return std::atoll(str.c_str() + start_pos);
         }
 
         // Decimal part

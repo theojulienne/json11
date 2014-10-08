@@ -110,4 +110,8 @@ int main(int argc, char **argv) {
     std::vector<Point> points = { { 1, 2 }, { 10, 20 }, { 100, 200 } };
     std::string points_json = Json(points).dump();
     printf("%s\n", points_json.c_str());
+
+    Json long_num = Json::parse("{\"t\": 1412799879853}", err);
+    assert(long_num["t"].long_value() == 1412799879853);
+    assert(long_num.dump() == "{\"t\": 1412799879853}");
 }
