@@ -173,7 +173,7 @@ class JsonInt final : public Value<Json::NUMBER, long long int> {
     bool equals(const JsonValue * other) const { return m_value == other->number_value(); }
     bool less(const JsonValue * other)   const { return m_value <  other->number_value(); }
 public:
-    JsonInt(double value) : Value(value) {}
+    JsonInt(long long int value) : Value(value) {}
 };
 
 class JsonBoolean final : public Value<Json::BOOL, bool> {
