@@ -513,7 +513,7 @@ struct JsonParser {
 
         if (str[i] != '.' && str[i] != 'e' && str[i] != 'E'
                 && (i - start_pos) <= (size_t)std::numeric_limits<int>::digits10) {
-            return std::atoll(str.c_str() + start_pos);
+            return std::atoi(str.c_str() + start_pos);
         }
 
         // Decimal part
